@@ -1,37 +1,22 @@
-## Welcome to GitHub Pages
+# Project Name
 
-You can use the [editor on GitHub](https://github.com/GhofranDayyat/city_explorer_api/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+**Author**: Ghofran Dayyat
+**Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Overview
+<!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
 
-### Markdown
+## Getting Started
+<!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Architecture
+<!-- Provide a detailed description of the application design. What technologies (languages, libraries, etc) you're using, and any other relevant design information. -->
 
-```markdown
-Syntax highlighted code block
+## Change Log
+<!-- Use this area to document the iterative changes made to your application as each feature is successfully implemented. Use time stamps. Here's an examples:
 
-# Header 1
-## Header 2
-### Header 3
+01-01-2001 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/GhofranDayyat/city_explorer_api/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+## Credits and Collaborations
+<!-- Give credit (and a link) to other people or resources that helped you build this application. -->
+-->
