@@ -14,26 +14,43 @@ app.use(cors());
 
 // routes
 app.get('/location', handelLocationRequest);
-// app.get('/weather', handelWeatherRequest);
+app.get('/weather', handelWeatherRequest);
 
 
 
 function handelLocationRequest(req, res) {
 
-  const searchQuery = req.query;
-  console.log(searchQuery);
+  const searchQuery = req.query.city;
+  //   console.log(searchQuery);
 
   const locationsRawData = require('./data/location.json');
-  const location = new Location(locationsRawData[0])
+  const location = new Location(locationsRawData[0],searchQuery);
   res.send(location);
 }
 
+
+function handelWeatherRequest(req,res){
+  const weatherRawData = require('./data/weather.json');
+  const dateOfWeather=[];
+  weatherRawData.forEach(weather=>{
+    dateOfWeather.push(new Weather(weather));
+  });
+  res.send(dateOfWeather);
+
+}
 // constructors
 
-function Location(data) {
+function Location(data,query) {
+  this.search_query=query;
+  this.formatted_query = data.display_name;
   this.latitude = data.lat;
   this.longitude = data.lon;
 }
-// to check if the server listen 
+function Weather(data){
+  this.time=data.valid_date;
+  this.forecast=`${data.weather.description}in the morning`;
+}
+// to check if the server listen
+//go to the terminal and write the command node server.js
 app.listen(PORT, () => console.log(`Listening to Port`));
 
