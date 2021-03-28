@@ -1,0 +1,26 @@
+{
+  "name": "city_explorer_api",
+  "version": "1.0.0",
+  "description": "You can use the [editor on GitHub](https://github.com/GhofranDayyat/city_explorer_api/edit/main/README.md) to maintain and preview the content for your website in Markdown files.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GhofranDayyat/city_explorer_api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GhofranDayyat/city_explorer_api/issues"
+  },
+  "homepage": "https://github.com/GhofranDayyat/city_explorer_api#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
