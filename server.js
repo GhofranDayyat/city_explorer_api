@@ -18,39 +18,60 @@ app.get('/weather', handelWeatherRequest);
 
 
 
+const errorMsg={
+  status: 500,
+  responseText: 'Sorry, something went wrong',
+};
+
 function handelLocationRequest(req, res) {
 
-  const searchQuery = req.query.city;
+  const searchQuery = req.query.city.toLowerCase();
   //   console.log(searchQuery);
+  const matchWord=searchQuery.match(/lynnwood/g);
 
-  const locationsRawData = require('./data/location.json');
-  const location = new Location(locationsRawData[0],searchQuery);
-  res.send(location);
+  if(matchWord){
+    const locationsRawData = require('./data/location.json');
+    const location = new Location(locationsRawData[0],searchQuery);
+    res.send(location);
+  }else{
+    res.send(errorMsg);
+  }
 }
 
-
 function handelWeatherRequest(req,res){
-  const weatherRawData = require('./data/weather.json');
-  const dateOfWeather=[];
-  weatherRawData.forEach(weather=>{
-    dateOfWeather.push(new Weather(weather));
-  });
-  res.send(dateOfWeather);
+  const searchQuery = req.query.city.toLowerCase();
+  const matchWord=searchQuery.match(/lynnwood/g);
+
+  if (matchWord){
+
+    const weatherRawData = require('./data/weather.json');
+    const dateOfWeather=[];
+    console.log(weatherRawData.data);
+    weatherRawData.data.forEach(weather=>{
+      dateOfWeather.push(new Weather(weather));
+    });
+    res.send(dateOfWeather);
+  }else{
+    res.send(errorMsg);
+  }
 
 }
 // constructors
 
 function Location(data,query) {
   this.search_query=query;
-  this.formatted_query = data.display_name;
+  this.formatted_query = data.display_name.toLowerCase();
   this.latitude = data.lat;
   this.longitude = data.lon;
 }
 function Weather(data){
-  this.time=data.valid_date;
-  this.forecast=`${data.weather.description}in the morning`;
+  this.time=data.datetime;
+  this.forecast=`${data.weather.description} in the morning`;
 }
 // to check if the server listen
 //go to the terminal and write the command node server.js
 app.listen(PORT, () => console.log(`Listening to Port`));
+// app.use('*', (req, res) => {
+//   res.send('City Explorer!');
+// });
 
