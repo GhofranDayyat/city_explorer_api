@@ -6,15 +6,21 @@ require('dotenv').config();
 // Application Dependencies
 const express = require('express');
 const cors = require('cors');
+// const superagent=require('superagent');
 
 // Application Setup
 const PORT = process.env.PORT;
+// const GEO_CODE_API_KEY = process.env.GEO_CODE_API_KEY;
 const app = express();
 app.use(cors());
+
 
 // routes
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
+// app.get()
+
+
 
 function handelLocationRequest(req, res) {
 
@@ -33,7 +39,7 @@ function handelWeatherRequest(req,res){
   try{
 
     weatherRawData = require('./data/weather.json');
-    weatherRawData.data.forEach(weather=>{
+    weatherRawData.data.map(weather=>{
       dateOfWeather.push(new Weather(weather));
     });
     res.send(dateOfWeather);
