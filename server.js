@@ -44,6 +44,7 @@ function handelWeatherRequest(req,res){
   });
   res.send(dateOfWeather);
 }
+// right
 // constructors
 
 function Location(data,query) {
