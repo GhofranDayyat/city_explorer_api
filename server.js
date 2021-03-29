@@ -6,49 +6,70 @@ require('dotenv').config();
 // Application Dependencies
 const express = require('express');
 const cors = require('cors');
+const superagent=require('superagent');
 
 // Application Setup
 const PORT = process.env.PORT;
+const GEO_CODE_API_KEY = process.env.GEO_CODE_API_KEY;
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const app = express();
 app.use(cors());
+
 
 // routes
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
+// app.get()
+
+
 
 function handelLocationRequest(req, res) {
-
   const searchQuery = req.query.city;
+  const cityQueryParam = {
+    key: GEO_CODE_API_KEY,
+    searchQuery: searchQuery,
+    format: 'json'
+  };
+  const url = `https://us1.locationiq.com/v1/search.php?key=${GEO_CODE_API_KEY}&q=${searchQuery}&format=json`;
+
   if(!searchQuery){
-    res.status(500).send('no city, was found');
+    res.status(404).send('no city, was found');
   }
-  const locationsRawData = require('./data/location.json');
-  const location = new Location(locationsRawData[0],searchQuery);
-  res.send(location);
+  superagent.get(url).query(cityQueryParam).then(data => {
+
+    const location = new Location(searchQuery, data.body[0]);
+    res.status(200).send(location);
+  }).catch((error) => {
+    console.log('ERROR', error);
+    res.status(500).send('Sorry, something went wrong');
+  });
 }
 
 function handelWeatherRequest(req,res){
-  const dateOfWeather=[];
-  let weatherRawData;
-  try{
-
-    weatherRawData = require('./data/weather.json');
-    weatherRawData.data.forEach(weather=>{
-      dateOfWeather.push(new Weather(weather));
-    });
-    res.send(dateOfWeather);
-  }catch(error){
-    res.status(500).send('internal server error occurred');
-  }
+  const searchQuery = req.query.city;
+  const weatherQueryParam = {
+    key: WEATHER_API_KEY,
+    searchQuery: searchQuery,
+    format: 'json'
+  };
+  const url = `//api.weatherbit.io/v2.0/forecast/daily?city=${searchQuery}&key=${WEATHER_API_KEY}&&format=json`;
+  superagent.get(url).query(weatherQueryParam).then(data => {
+    const weather = new Weather( data.body[0]);
+    res.status(200).send(weather);
+  }).catch((error) => {
+    console.log('ERROR', error);
+    res.status(500).send('Sorry, something went wrong in weather');
+  });
 }
+
 
 // constructors
 
-function Location(data,query) {
+function Location(query,geoData) {
   this.search_query=query;
-  this.formatted_query = data.display_name.toLowerCase();
-  this.latitude = data.lat;
-  this.longitude = data.lon;
+  this.formatted_query = geoData.display_name.toLowerCase();
+  this.latitude = geoData.lat;
+  this.longitude = geoData.lon;
 }
 function Weather(data){
   this.time=data.datetime;
