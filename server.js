@@ -33,7 +33,6 @@ function handelWeatherRequest(req,res){
   try{
 
     weatherRawData = require('./data/weather.json');
-    // weatherRawData='';
     weatherRawData.data.forEach(weather=>{
       dateOfWeather.push(new Weather(weather));
     });
@@ -42,7 +41,7 @@ function handelWeatherRequest(req,res){
     res.status(500).send('internal server error occurred');
   }
 }
-// right
+
 // constructors
 
 function Location(data,query) {
