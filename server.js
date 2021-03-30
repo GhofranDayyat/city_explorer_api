@@ -8,21 +8,45 @@ const express = require('express');
 const cors = require('cors');
 const superagent=require('superagent');
 // const { query } = require('express');
-
+const pg = require('pg');
 // Application Setup
 const PORT = process.env.PORT;
 const GEO_CODE_API_KEY = process.env.GEO_CODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const PARK_CODE_API_KEY = process.env.PARK_CODE_API_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
 const app = express();
 app.use(cors());
 
+// Database Connection Setup
+const location = new pg.City(DATABASE_URL);
 
 // routes
+app.get('/location', handelLocationRequest);
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
 app.get('/park',handelParkRequest);
 
+
+// Add locations
+function handelAddUsers(req, res) {
+  // const sqlQuery = `INSERT INTO users(first_name, last_name) VALUES(${first_name}, ${last_name})`;
+
+  const safeValues = [searchQuery, formatted_query , latitude, longitude];
+  const sqlQuery = `INSERT INTO location(search_query, formatted_query, latitude, longitude) VALUES( $1, $2, $3, $4 )`;
+
+  // add user to db
+  location.query(sqlQuery, safeValues).then(result => {
+
+    res.status(200).json(result);
+  }).catch(error => {
+    console.log(error);
+    res.status(500).send('Internal server error');
+  });
+
+}
+
+//functions
 function handelLocationRequest(req, res) {
   const searchQuery = req.query.city;
   const cityQueryParam = {
@@ -90,7 +114,6 @@ function Weather(data){
   this.forecast=data.weather.description;
   this.time=data.datetime;
 }
-
 function Park(data){
   this.name = data.name;
   this.description = data.description;
@@ -107,5 +130,13 @@ function errormsg(req,res){
   res.status(500).send('Sorry, something went wrong');
 }
 app.use('*', errormsg);
+
+// Connect to DB and Start the Web Server
+location.connect().then(() => {
+  app.listen(PORT, () => {
+    console.log('Connected to database:', location.connectionParameters.database) //show what database we connected to
+    console.log('Server up on', PORT);
+  });
+});
 
 
