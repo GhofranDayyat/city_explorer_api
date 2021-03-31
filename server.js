@@ -19,54 +19,36 @@ const app = express();
 app.use(cors());
 
 // Database Connection Setup
-const location = new pg.City(DATABASE_URL);
+const client = new pg.Client({
+  connectionString: DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 
 // routes
 app.get('/location', handelLocationRequest);
-app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
 app.get('/park',handelParkRequest);
+app.get('/',(request)=>{request.status(200).send('ok');});
 
 
-// Add locations
-function handelAddUsers(req, res) {
-  // const sqlQuery = `INSERT INTO users(first_name, last_name) VALUES(${first_name}, ${last_name})`;
-
-  const safeValues = [searchQuery, formatted_query , latitude, longitude];
-  const sqlQuery = `INSERT INTO location(search_query, formatted_query, latitude, longitude) VALUES( $1, $2, $3, $4 )`;
-
-  // add user to db
-  location.query(sqlQuery, safeValues).then(result => {
-
-    res.status(200).json(result);
-  }).catch(error => {
-    console.log(error);
-    res.status(500).send('Internal server error');
-  });
-
-}
 
 //functions
 function handelLocationRequest(req, res) {
   const searchQuery = req.query.city;
-  const cityQueryParam = {
-    key: GEO_CODE_API_KEY,
-    searchQuery: searchQuery,
-    format: 'json'
-  };
-  const url = `https://us1.locationiq.com/v1/search.php?q=${searchQuery}&key=${GEO_CODE_API_KEY}`;
 
   if(!searchQuery){
     res.status(404).send('no city, was found');
   }
-  superagent.get(url).query(cityQueryParam).then(data => {
-
-    const location = new Location(searchQuery, data.body[0]);
-    res.status(200).send(location);
-  }).catch((error) => {
-    console.log('ERROR', error);
-    res.status(500).send('Sorry, something went wrong');
+  locationData(searchQuery).then(data=>{
+    res.status(200).json(data);
+  }).catch(error=>{
+    console.log(error);
+    res.status(500).send('Soryr , something went wrong');
   });
+
 }
 
 function handelWeatherRequest(req,res){
@@ -102,6 +84,40 @@ function handelParkRequest(req ,res){
 }
 
 
+
+// Add locations
+function locationData (citySearch) {
+
+  console.log('go to the locationData function');
+  const safeValues = [citySearch];
+  const sqlQuery = `SELECT * FROM locations WHERE search_query =$1`;
+  return client.query(sqlQuery,safeValues).then(result=>{
+    if (result.rows.length!==0){
+      //get the data from DB
+      return result.rows[0];///rows not row
+    }else{
+      //get the data from the APT
+      const url = `https://us1.locationiq.com/v1/search.php`;
+      const cityQueryParam = {
+        key: GEO_CODE_API_KEY,
+        q: citySearch,
+        format: 'json'
+      };
+
+      return superagent.get(url).query(cityQueryParam).then(data => {
+        const location = new Location(citySearch, data.body[0]);
+        const safeValues = [location.search_query,location.formatted_query, location.latitude, location.longitude];
+        const sqlQuery = `INSERT INTO locations(search_query, formatted_query, latitude, longitude)VALUES($1, $2, $3, $4)`;
+        client.query(sqlQuery,safeValues);
+        return location;
+      }).catch(error=>{
+        console.log(error);
+
+      });
+    }
+  });
+}
+
 // constructors
 
 function Location(query,geoData) {
@@ -123,8 +139,7 @@ function Park(data){
 }
 // to check if the server listen
 //go to the terminal and write the command node server.js
-app.listen(PORT,()=>
-  console.log(`Listen to port ${PORT}`));
+//or istall nodemon
 
 function errormsg(req,res){
   res.status(500).send('Sorry, something went wrong');
@@ -132,11 +147,12 @@ function errormsg(req,res){
 app.use('*', errormsg);
 
 // Connect to DB and Start the Web Server
-location.connect().then(() => {
+client.connect().then(() => {
   app.listen(PORT, () => {
-    console.log('Connected to database:', location.connectionParameters.database) //show what database we connected to
+    console.log('Connected to database:', client.connectionParameters.database) ;//show what database we connected to
     console.log('Server up on', PORT);
   });
 });
+
 
 
