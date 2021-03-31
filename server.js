@@ -15,6 +15,8 @@ const GEO_CODE_API_KEY = process.env.GEO_CODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const PARK_CODE_API_KEY = process.env.PARK_CODE_API_KEY;
 const DATABASE_URL = process.env.DATABASE_URL;
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
+const YELP_API_KEY = process.env.YELP_API_KEY;
 const app = express();
 app.use(cors());
 
@@ -33,8 +35,9 @@ const client = new pg.Client(DATABASE_URL);
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
 app.get('/park',handelParkRequest);
+app.get('/movies',handelMoviesRequest);
 app.get('/',(request)=>{request.status(200).send('ok');});
-
+app.get('/',handelYelpRequest);
 
 
 //functions
@@ -85,7 +88,39 @@ function handelParkRequest(req ,res){
   });
 }
 
+function handelMoviesRequest(req,res){
+  const searchQuery = req.query.search_query;
+  const url = `https://api.themoviedb.org/3/movie?api_key=${MOVIE_API_KEY}&query=${searchQuery}`;
+  if (!searchQuery) {
+    res.status(404).send('write query to search');
+  }
+  superagent.get(url).then(e=>{
+    const movieData = e.body.results.map(el=>{
+      return new Movies(el);
+    });
+    res.status(200).send(movieData);
+  }).catch(error=>{
+    console.error('ERROR',error);
+    res.status(500).send('there is error in the data of movie');
+  });
+}
 
+function handelYelpRequest(req, res){
+  const searchQuery = req.query.search_query;
+  const url = `https://api.yelp.com/v3/businesses/search?location=${searchQuery}`;
+  if (!searchQuery) {
+    res.status(404).send('write query to search');
+  }
+
+  superagent.get(url).set('Authorization', `${YELP_API_KEY}`).then(e=>{
+    const movieData = e.body.map(el=>{
+      return new Yelp(el);
+    });
+    res.status(200).send(movieData);
+  }).catch(error=>{
+    console.error('ERROR',error);
+    res.status(500).send('there is error in the data of movie');
+  });}
 
 // Add locations
 function locationData (citySearch) {
@@ -138,6 +173,24 @@ function Park(data){
   this.address = `${data.addresses[0].line1} ,${data.addresses[0].city} , ${data.addresses[0].stateCode} , ${data.addresses[0].postalCode} `;
   this.fee = '0.00';
   this.park_url = data.url;
+}
+
+function Movies(data){
+  this.title=data.title;
+  this.overview=data.overview;
+  this.average_votes=data.vote_average;
+  this.total_votes =data.vote_count;
+  this.image_url = `https://image.tmdb.org/t/p/w185_and_h278_bestv2/${data.poster_path}`;
+  this.popularity = data.popularity;
+  this.released_on =data.release_date;
+}
+
+function Yelp(data) {
+  this.name = data.name;
+  this.image_url = data.image_url;
+  this.price = data.price;
+  this.rating = data.rating;
+  this.url = data.url;
 }
 // to check if the server listen
 //go to the terminal and write the command node server.js
