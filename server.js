@@ -28,11 +28,13 @@ let client = '';
 if (ENV === 'DEP') {
   client = new pg.Client({
     connectionString: DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
   });
 } else {
   client = new pg.Client({
     connectionString: DATABASE_URL,
-    ssl : {}
   });
 }
 
