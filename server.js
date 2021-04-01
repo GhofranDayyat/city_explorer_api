@@ -23,16 +23,18 @@ app.use(cors());
 
 // // Database Connection Setup
 // const client = new pg.Client(DATABASE_URL);
-
+//to solve the deploy problem (need to ssl to deploy,but can't work locally)
 let client = '';
 if (ENV === 'DEP') {
   client = new pg.Client({
     connectionString: DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
   });
 } else {
   client = new pg.Client({
     connectionString: DATABASE_URL,
-    ssl : {}
   });
 }
 
