@@ -43,11 +43,13 @@ app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
 app.get('/parks',handelParkRequest);
 app.get('/movies',handelMoviesRequest);
+app.get('/yelp',handelYelpRequest);
 app.get('/',(request)=>{request.status(200).send('ok');});
 app.get('/',handelYelpRequest);
 
 
 //functions
+//the word after query. used to search
 function handelLocationRequest(req, res) {
   const searchQuery = req.query.city;
 
@@ -108,7 +110,8 @@ function handelMoviesRequest(req,res){
 
 function handelYelpRequest(req, res){
   const searchQuery = req.query.search_query;
-  const url = `https://api.yelp.com/v3/businesses/search`;
+  console.log(searchQuery);
+  const url = `https://api.yelp.com/v3/businesses/search?location=${searchQuery}`;
   if (!searchQuery) {
     res.status(404).send('write query to search');
   }
@@ -120,7 +123,7 @@ function handelYelpRequest(req, res){
     res.status(200).send(yelpData);
   }).catch(error=>{
     console.error('ERROR',error);
-    res.status(500).send('there is error in the data of movie');
+    res.status(500).send('there is error in the data of Yelp');
   });}
 
 // Add locations
