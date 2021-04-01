@@ -43,7 +43,7 @@ app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
 app.get('/parks',handelParkRequest);
 app.get('/movies',handelMoviesRequest);
-// app.get('/',(request)=>{request.status(200).send('ok');});
+app.get('/',(request)=>{request.status(200).send('ok');});
 app.get('/',handelYelpRequest);
 
 
