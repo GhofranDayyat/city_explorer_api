@@ -21,7 +21,7 @@ app.use(cors());
 // routes
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
-app.get('/park',handelParkRequest);
+app.get('/parks',handelParkRequest);
 
 function handelLocationRequest(req, res) {
   const searchQuery = req.query.city;
