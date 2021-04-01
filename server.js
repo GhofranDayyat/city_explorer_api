@@ -11,6 +11,7 @@ const superagent=require('superagent');
 const pg = require('pg');
 // Application Setup
 const PORT = process.env.PORT;
+const ENV = process.env.ENV || 'DEP';
 const GEO_CODE_API_KEY = process.env.GEO_CODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const PARK_CODE_API_KEY = process.env.PARK_CODE_API_KEY;
@@ -20,23 +21,27 @@ const YELP_API_KEY = process.env.YELP_API_KEY;
 const app = express();
 app.use(cors());
 
-// Database Connection Setup
-const client = new pg.Client(DATABASE_URL);
+// // Database Connection Setup
+// const client = new pg.Client(DATABASE_URL);
 
-// const client = new pg.Client({
-//   connectionString: DATABASE_URL,
-//   ssl: {
-//     rejectUnauthorized: false
-//   }
-// });
-
+let client = '';
+if (ENV === 'DEP') {
+  client = new pg.Client({
+    connectionString: DATABASE_URL,
+  });
+} else {
+  client = new pg.Client({
+    connectionString: DATABASE_URL,
+    ssl : {}
+  });
+}
 
 // routes
 app.get('/location', handelLocationRequest);
 app.get('/weather', handelWeatherRequest);
-app.get('/park',handelParkRequest);
+app.get('/parks',handelParkRequest);
 app.get('/movies',handelMoviesRequest);
-app.get('/',(request)=>{request.status(200).send('ok');});
+// app.get('/',(request)=>{request.status(200).send('ok');});
 app.get('/',handelYelpRequest);
 
 
@@ -89,15 +94,9 @@ function handelParkRequest(req ,res){
 }
 
 function handelMoviesRequest(req,res){
-  const searchQuery = req.query.search_query;
-  const url = `https://api.themoviedb.org/3/movie?api_key=${MOVIE_API_KEY}&query=${searchQuery}`;
-  if (!searchQuery) {
-    res.status(404).send('write query to search');
-  }
+  const url = `https://api.themoviedb.org/3/movie/550?api_key=${MOVIE_API_KEY}`;
   superagent.get(url).then(e=>{
-    const movieData = e.body.results.map(el=>{
-      return new Movies(el);
-    });
+    let movieData = new Movies(e.body);//without map ; data not error
     res.status(200).send(movieData);
   }).catch(error=>{
     console.error('ERROR',error);
@@ -107,16 +106,16 @@ function handelMoviesRequest(req,res){
 
 function handelYelpRequest(req, res){
   const searchQuery = req.query.search_query;
-  const url = `https://api.yelp.com/v3/businesses/search?location=${searchQuery}`;
+  const url = `https://api.yelp.com/v3/businesses/search`;
   if (!searchQuery) {
     res.status(404).send('write query to search');
   }
 
-  superagent.get(url).set('Authorization', `${YELP_API_KEY}`).then(e=>{
-    const movieData = e.body.map(el=>{
+  superagent.get(url).set('Authorization', `Bearer ${YELP_API_KEY}`).then(e=>{
+    const yelpData = e.body.businesses.map(el=>{
       return new Yelp(el);
     });
-    res.status(200).send(movieData);
+    res.status(200).send(yelpData);
   }).catch(error=>{
     console.error('ERROR',error);
     res.status(500).send('there is error in the data of movie');
@@ -128,7 +127,7 @@ function locationData (citySearch) {
   console.log('go to the locationData function');
   const safeValues = [citySearch];
   const sqlQuery = `SELECT * FROM locations WHERE search_query =$1`;
-  return client.query(sqlQuery,safeValues).then(result=>{
+  return client.query(sqlQuery,safeValues).then(result=>{ //important to do return
     if (result.rows.length!==0){
       //get the data from DB
       return result.rows[0];///rows not row
