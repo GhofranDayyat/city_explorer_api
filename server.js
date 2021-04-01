@@ -111,7 +111,7 @@ function handelMoviesRequest(req,res){
 function handelYelpRequest(req, res){
   const searchQuery = req.query.search_query;
   console.log(searchQuery);
-  const url = `https://api.yelp.com/v3/businesses/search?location=${searchQuery}`;
+  const url = `https://api.yelp.com/v3/businesses/search?location=${searchQuery}&limit=5`;
   if (!searchQuery) {
     res.status(404).send('write query to search');
   }
